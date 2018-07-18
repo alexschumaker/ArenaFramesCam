@@ -1,0 +1,22 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ 
+ ..\..\FrameXML\UI.xsd">
+
+	<Script File = "ArenaFramesCam.lua"/>
+
+	<Frame name = "ArenaFramesCam">
+		<Scripts>
+			<OnLoad>
+				self:RegisterEvent("PLAYER_ENTERING_WORLD");
+				setArenaFramesAndCam();
+			</OnLoad>
+
+		</Scripts>
+	</Frame>
+</Ui> 
+
+
+
+
+
