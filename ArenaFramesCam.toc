@@ -1,4 +1,4 @@
-## Interface: 70300
+## Interface: 80000
 ## Title: ArenaFramesCam
 ## Notes: Makes it so you're always on the bottom of your arena frames. Raid Profile must be sorted by Group.
 ## Author: Anorian
