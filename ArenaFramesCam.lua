@@ -20,7 +20,10 @@ function ArenaFramesCam_EventFrame:ADDON_LOADED(self, addon)
 				moveClassResource = false,
 				enableBarHideKeys = false, 
 				hideMacroText = false,
-				hideBindingText = false
+				hideBindingText = false,
+				waterwalking = false,
+				hideBarArt = false,
+				hideEndCaps = false
 			}
 		end
 
@@ -69,6 +72,13 @@ function ArenaFramesCam_EventFrame:ADDON_LOADED(self, addon)
 		hideBottomRightBarBtn:SetAttribute("type", "macro")
 		hideBottomRightBarBtn:SetAttribute("macrotext", "/click InterfaceOptionsActionBarsPanelBottomRight")
 
+		--create buttons for the walterwalking mount bind
+		waterwalkingMountFrame = CreateFrame("Frame", "waterwalkingMountFrame", ArenaFramesCam_EventFrame)
+
+		waterwalkingMountBtn = CreateFrame("Button", "waterwalkingMountBtn", waterwalkingMountFrame, "SecureActionButtonTemplate")
+		waterwalkingMountBtn:SetAttribute("type", "macro")
+		waterwalkingMountBtn:SetAttribute("macrotext", "/cast Azure Water Strider")
+
 		-- create hooks for class resource frame
 		if classResourceFrame then 
 			hooksecurefunc(classResourceFrame,"SetPoint", ArenaFramesCam_moveClassResource)
@@ -88,6 +98,7 @@ function ArenaFramesCam_EventFrame:PLAYER_ENTERING_WORLD()
 	ArenaFramesCam_setBarHideKeys()
 	ArenaFramesCam_hideMacroText()
 	ArenaFramesCam_hideBindingText()
+	ArenaFramesCam_bindWaterwalkingMount()
 end
 
 
@@ -112,7 +123,9 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			"\nclassresource / cr: Move your class resource counter"..
 			"\nhidebars / hb / bh: Enables SHIFT-6/7 for hiding action bars"..
 			"\nmacrotext / m: hide macro text on action bars"..
-			"\nbindingtext / b: hide binding text on action bars")
+			"\nbindingtext / b: hide binding text on action bars"..
+			"\nhidebarart / ba: hides all the action bar artwork"..
+			"\nhideendcaps / ec: hides the gryphon end caps")
 
 	elseif msg == "arenaframes" or msg == "af" then -- toggle setPlayerBottom if there is no message
 		if ArenaFramesCamDB.setPlayerBottom then 
@@ -193,6 +206,41 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			print(white.."Binding Text Hidden.")
 		end
 		ArenaFramesCam_hideBindingText()
+
+	elseif msg == "bm" or msg == "mb" then 
+		SlashCmdList.ARENAFRAMESCAM('m')
+		SlashCmdList.ARENAFRAMESCAM('b')
+
+	elseif msg == "ww" then 
+		if ArenaFramesCamDB.waterwalking then 
+			ArenaFramesCamDB.waterwalking = false
+			print(blue.."Waterwalking mount unbound from Shift-`.")
+		else
+			ArenaFramesCamDB.waterwalking = true
+			print(blue.."Waterwalking mount bound to Shift-`.")
+		end
+		ArenaFramesCam_bindWaterwalkingMount()
+
+	elseif msg == "hidebarart" or msg == "ba" then 
+		if ArenaFramesCamDB.hideBarArt then 
+			ArenaFramesCamDB.hideBarArt = false
+			print(orange.."Bar Art Shown.")
+		else
+			ArenaFramesCamDB.hideBarArt = true
+			print(orange.."Bar Art Hidden.")
+		end
+		ArenaFramesCam_hideBarArt()
+		ArenaFramesCam_hideEndCaps()
+
+	elseif msg == "endcaps" or msg == "ec" then 
+		if ArenaFramesCamDB.hideEndCaps then 
+			ArenaFramesCamDB.hideEndCaps = false
+			print(orange.."End Caps Shown.")
+		else
+			ArenaFramesCamDB.hideEndCaps = true
+			print(orange.."End Caps Hidden.")
+		end
+		ArenaFramesCam_hideEndCaps()
 
 	elseif msg == "test" or msg == "t" then -- TEST CODE
 		testtab = {['key'] = 1, ['key2'] = 2}
@@ -416,6 +464,40 @@ function ArenaFramesCam_hideBindingText()
 		_G["MultiBarBottomRightButton"..i.."HotKey"]:SetAlpha(val) 
 		_G["ActionButton"..i.."HotKey"]:SetAlpha(val) 
 	end	
+end
+
+-- handle the water skitter waterwalking mount bind
+function ArenaFramesCam_bindWaterwalkingMount()
+	if ArenaFramesCamDB.waterwalking then
+		SetOverrideBinding(waterwalkingMountFrame, false, "SHIFT-`", "CLICK waterwalkingMountBtn:LeftButton")
+	else
+		ClearOverrideBindings(waterwalkingMountFrame)
+	end
+end
+
+--deal with bar art
+function ArenaFramesCam_hideBarArt()
+	if ArenaFramesCamDB.hideBarArt then 
+		MainMenuBarArtFrameBackground:Hide()
+		MainMenuBarArtFrame.PageNumber:Hide()
+		ActionBarUpButton:Hide()
+		ActionBarDownButton:Hide()
+	else
+		MainMenuBarArtFrameBackground:Show()
+		MainMenuBarArtFrame.PageNumber:Show()
+		ActionBarUpButton:Show()
+		ActionBarDownButton:Show()
+	end
+end
+
+function ArenaFramesCam_hideEndCaps()
+	if ArenaFramesCamDB.hideEndCaps or ArenaFramesCamDB.hideBarArt then
+		MainMenuBarArtFrame.RightEndCap:Hide()
+		MainMenuBarArtFrame.LeftEndCap:Hide()
+	else
+		MainMenuBarArtFrame.RightEndCap:Show()
+		MainMenuBarArtFrame.LeftEndCap:Show()
+	end
 end
 
 -- change arena enemy nameplate names
