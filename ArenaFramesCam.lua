@@ -1,3 +1,4 @@
+local addonName, AFC = ...; 
 local donerino = false
 local defaultResourcePoint
 local defaultSecondaryPoint
@@ -10,7 +11,7 @@ ArenaFramesCam_EventFrame:SetScript("OnEvent", function(self,event,...) self[eve
 
 --init
 function ArenaFramesCam_EventFrame:ADDON_LOADED(self, addon)
-	if addon == "ArenaFramesCam" then 
+	if addon == addonName then 
 		if not ArenaFramesCamDB then -- Set defaults
 			ArenaFramesCamDB = {
 				setPlayerBottom = false,
@@ -26,40 +27,40 @@ function ArenaFramesCam_EventFrame:ADDON_LOADED(self, addon)
 				hideEndCaps = false
 			}
 		end
-
+		
 		--Check what class you are for class resource moving
 		local playerClass = UnitClass("player")
 		local classResourceFrame
 		local classSecondaryFrame
 		if playerClass == "Rogue" then 
-			ArenaFramesCam_moveClassResource = ArenaFramesCam_Rouge
+			AFC.moveClassResource = AFC.Rouge
 			classResourceFrame = ComboPointPlayerFrame
 			defaultResourcePoint = {ComboPointPlayerFrame:GetPoint()}
 
 		elseif playerClass == "Death Knight" then 
-			ArenaFramesCam_moveClassResource = ArenaFramesCam_DK
+			AFC.moveClassResource = AFC.DK
 			classResourceFrame = RuneFrame
 			defaultResourcePoint = {RuneFrame:GetPoint()}
 
 		elseif playerClass == "Monk" then 
-			ArenaFramesCam_moveClassResource = ArenaFramesCam_Monk
+			AFC.moveClassResource = AFC.Monk
 			classResourceFrame = MonkHarmonyBarFrame
 			classSecondaryFrame = MonkStaggerBar
 			defaultResourcePoint = {MonkHarmonyBarFrame:GetPoint()}
 			defaultSecondaryPoint = {MonkStaggerBar:GetPoint()}
 
 		elseif playerClass == "Druid" then 
-			ArenaFramesCam_moveClassResource = ArenaFramesCam_Druid
+			AFC.moveClassResource = AFC.Druid
 			classResourceFrame = ComboPointPlayerFrame
 			defaultResourcePoint = {ComboPointPlayerFrame:GetPoint()}
 		else
-			ArenaFramesCam_moveClassResource = function() end
+			AFC.moveClassResource = function() end
 		end
 		
 		--create flame cat button and set its attribute based on setting
 		flameCatBtn = CreateFrame("Button", "flameCatBtn", ArenaFramesCam_EventFrame, "SecureActionButtonTemplate")
 		flameCatBtn:SetAttribute("type", "item")
-		ArenaFramesCam_flameCatBtnSetting()
+		AFC.flameCatBtnSetting()
 
 		--create buttons for bar hide hotkeys in their own frame so the bindings can be easily cleared if option is disabled
 		BarHideKeysFrame = CreateFrame("Frame", "BarHideKeysFrame", ArenaFramesCam_EventFrame)
@@ -81,9 +82,9 @@ function ArenaFramesCam_EventFrame:ADDON_LOADED(self, addon)
 
 		-- create hooks for class resource frame
 		if classResourceFrame then 
-			hooksecurefunc(classResourceFrame,"SetPoint", ArenaFramesCam_moveClassResource)
+			hooksecurefunc(classResourceFrame,"SetPoint", AFC.moveClassResource)
 			if classSecondaryFrame then
-				hooksecurefunc(classSecondaryFrame,"SetPoint", ArenaFramesCam_moveClassResource)
+				hooksecurefunc(classSecondaryFrame,"SetPoint", AFC.moveClassResource)
 			end
 		end
 	end
@@ -91,14 +92,14 @@ end
 
 function ArenaFramesCam_EventFrame:PLAYER_ENTERING_WORLD()
 	--assess whether we should customize certain things and then do/don't
-	ArenaFramesCam_setArenaFramesAndCam()
-	ArenaFramesCam_setStanceBar()
-	ArenaFramesCam_SetVehicleBar()
-	ArenaFramesCam_moveClassResource()
-	ArenaFramesCam_setBarHideKeys()
-	ArenaFramesCam_hideMacroText()
-	ArenaFramesCam_hideBindingText()
-	ArenaFramesCam_bindWaterwalkingMount()
+	AFC.setArenaFramesAndCam()
+	AFC.setStanceBar()
+	AFC.SetVehicleBar()
+	AFC.moveClassResource()
+	AFC.setBarHideKeys()
+	AFC.hideMacroText()
+	AFC.hideBindingText()
+	AFC.bindWaterwalkingMount()
 end
 
 
@@ -135,7 +136,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.setPlayerBottom = true
 			print(green.."Player always on the bottom.")
 		end
-		ArenaFramesCam_setArenaFramesAndCam()
+		AFC.setArenaFramesAndCam()
 
 	elseif msg == "fc" or msg == "flamecat" or msg == "c" then  --toggle use of fandral's seed pouch
 		if ArenaFramesCamDB.useFlameCat then 
@@ -145,7 +146,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.useFlameCat = true
 			print(orange.."Fandral's Seed Pouch Enabled.")
 		end
-		ArenaFramesCam_flameCatBtnSetting()
+		AFC.flameCatBtnSetting()
 
 	elseif msg == "s" or msg == "stance" or msg == "sb" then 
 		if ArenaFramesCamDB.stanceBar then 
@@ -155,7 +156,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.stanceBar = true
 			print(blue.."Stance Bar Shown.")
 		end
-		ArenaFramesCam_setStanceBar()
+		AFC.setStanceBar()
 
 	elseif msg == "v" or msg == "vb" or msg == "vehiclebinds" then 
 		if ArenaFramesCamDB.useBottomRightBarForVehicles then 
@@ -165,7 +166,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.useBottomRightBarForVehicles = true
 			print("|cFF00FF00Vehicle Bar will work with BottomRight action bar binds.")
 		end
-		ArenaFramesCam_SetVehicleBar()
+		AFC.SetVehicleBar()
 
 	elseif msg == "classresource" or msg == "cr" or msg == "cp" then 
 		if ArenaFramesCamDB.moveClassResource then 
@@ -175,7 +176,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.moveClassResource = true
 			print(red.."Class resource moved.")
 		end
-		ArenaFramesCam_moveClassResource()
+		AFC.moveClassResource()
 
 	elseif msg == "barhide" or msg == "bh" or msg == "hb" then 
 		if ArenaFramesCamDB.enableBarHideKeys then
@@ -185,7 +186,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.enableBarHideKeys = true
 			print(blue.."Hide Bar HotKeys (SHIFT-6/7) enabled.")
 		end
-		ArenaFramesCam_setBarHideKeys()
+		AFC.setBarHideKeys()
 
 	elseif msg == "macrotext" or msg == "m" then 
 		if ArenaFramesCamDB.hideMacroText then
@@ -195,7 +196,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.hideMacroText = true
 			print(white.."Macro Text Hidden.")
 		end
-		ArenaFramesCam_hideMacroText()
+		AFC.hideMacroText()
 
 	elseif msg == "bindingtext" or msg == "b" then
 		if ArenaFramesCamDB.hideBindingText then
@@ -205,7 +206,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.hideBindingText = true
 			print(white.."Binding Text Hidden.")
 		end
-		ArenaFramesCam_hideBindingText()
+		AFC.hideBindingText()
 
 	elseif msg == "bm" or msg == "mb" then 
 		SlashCmdList.ARENAFRAMESCAM('m')
@@ -219,7 +220,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.waterwalking = true
 			print(blue.."Waterwalking mount bound to Shift-`.")
 		end
-		ArenaFramesCam_bindWaterwalkingMount()
+		AFC.bindWaterwalkingMount()
 
 	elseif msg == "hidebarart" or msg == "ba" then 
 		if ArenaFramesCamDB.hideBarArt then 
@@ -229,8 +230,8 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.hideBarArt = true
 			print(orange.."Bar Art Hidden.")
 		end
-		ArenaFramesCam_hideBarArt()
-		ArenaFramesCam_hideEndCaps()
+		AFC.hideBarArt()
+		AFC.hideEndCaps()
 
 	elseif msg == "endcaps" or msg == "ec" then 
 		if ArenaFramesCamDB.hideEndCaps then 
@@ -240,11 +241,13 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 			ArenaFramesCamDB.hideEndCaps = true
 			print(orange.."End Caps Hidden.")
 		end
-		ArenaFramesCam_hideEndCaps()
+		AFC.hideEndCaps()
 
 	elseif msg == "test" or msg == "t" then -- TEST CODE
 		testtab = {['key'] = 1, ['key2'] = 2}
-		print(testtab["key2"])
+		testtab2 = testtab
+		testtab2['key'] = 42
+		print(testtab['key'])
 											-- END TEST CODE
 	else
 		print("Invalid Command.")
@@ -253,7 +256,7 @@ function SlashCmdList.ARENAFRAMESCAM(msg)
 end
 
 --my sort function
-function ArenaFramesCam_playerOnBottom(t1, t2) 
+function AFC.playerOnBottom(t1, t2) 
 	if UnitIsUnit(t1,"player") then 
 		return false 
 	elseif UnitIsUnit(t2,"player") then 
@@ -264,14 +267,14 @@ function ArenaFramesCam_playerOnBottom(t1, t2)
 end 
 
 --set sort layout
-function ArenaFramesCam_setArenaFramesAndCam()
+function AFC.setArenaFramesAndCam()
 	if ArenaFramesCamDB.setPlayerBottom then 
-		CRFSort_Group = ArenaFramesCam_playerOnBottom
+		CRFSort_Group = AFC.playerOnBottom
 	end
 end
 
 --use flamecat (or not)
-function ArenaFramesCam_flameCatBtnSetting()
+function AFC.flameCatBtnSetting()
 	if ArenaFramesCamDB.useFlameCat then
 		flameCatBtn:SetAttribute("item", "Fandral's Seed Pouch")
 	else
@@ -293,7 +296,7 @@ function ArenaFramesCam_flameCatBtnSetting()
 end
 
 --stance bar handlers
-function ArenaFramesCam_setStanceBar()
+function AFC.setStanceBar()
 	if ArenaFramesCamDB.stanceBar then 
 		StanceBarFrame:Show()
 		StanceBarFrame:SetScript("OnShow", function() end)
@@ -307,7 +310,7 @@ function ArenaFramesCam_setStanceBar()
 end
 
 -- set alternate vehicle UI binds to be BottomRightBar binds
-function ArenaFramesCam_SetVehicleBar()
+function AFC.SetVehicleBar()
 	if ArenaFramesCamDB.useBottomRightBarForVehicles then
 		--build buttons
 		AFCVehicleButtonFrame = CreateFrame("Frame", "AFCVehicleButtonFrame", UIParent)
@@ -330,7 +333,7 @@ function ArenaFramesCam_SetVehicleBar()
 end
 
 -- Deal with Combo Points/Runes/Shadow/Orbs/Chi/etc
-function ArenaFramesCam_Rouge(frame, anchPoint, parent, relPoint, x, y)
+function AFC.Rouge(frame, anchPoint, parent, relPoint, x, y)
 	local X, Y = 0, -201.5
 	if ArenaFramesCamDB.moveClassResource then
 		if parent ~= UIParent then 
@@ -347,7 +350,7 @@ function ArenaFramesCam_Rouge(frame, anchPoint, parent, relPoint, x, y)
 	end
 end
 
-function ArenaFramesCam_DK(frame, anchPoint, parent, relPoint, x, y)
+function AFC.DK(frame, anchPoint, parent, relPoint, x, y)
 	local X, Y = 6.6, -120
 	if ArenaFramesCamDB.moveClassResource then
 		if parent ~= UIParent then
@@ -368,7 +371,7 @@ function ArenaFramesCam_DK(frame, anchPoint, parent, relPoint, x, y)
 	end
 end
 
-function ArenaFramesCam_Monk(frame, anchPoint, parent, relPoint, x, y)
+function AFC.Monk(frame, anchPoint, parent, relPoint, x, y)
 	--local spec = select(2, GetSpecializationInfo(GetSpecialization()))
 	local mhb = MonkHarmonyBarFrame
 	local X, Y = .5,-184
@@ -406,7 +409,7 @@ function ArenaFramesCam_Monk(frame, anchPoint, parent, relPoint, x, y)
 	end
 end
 
-function ArenaFramesCam_Druid(frame, anchPoint, parent, relPoint, x, y)
+function AFC.Druid(frame, anchPoint, parent, relPoint, x, y)
 	local spec = select(2, GetSpecializationInfo(GetSpecialization()))
 	local X, Y = 0, -215
 	if ArenaFramesCamDB.moveClassResource and spec == "Feral" then
@@ -425,7 +428,7 @@ function ArenaFramesCam_Druid(frame, anchPoint, parent, relPoint, x, y)
 end
 
 -- set Bar Hide HotKeys
-function ArenaFramesCam_setBarHideKeys()
+function AFC.setBarHideKeys()
 	if ArenaFramesCamDB.enableBarHideKeys then 
 		SetOverrideBinding(BarHideKeysFrame, false, "SHIFT-6", "CLICK hideRightActionBarBtn:LeftButton")
 		SetOverrideBinding(BarHideKeysFrame, false, "SHIFT-7", "CLICK hideBottomRightBarBtn:LeftButton")
@@ -435,7 +438,7 @@ function ArenaFramesCam_setBarHideKeys()
 end
 
 -- hide macro text on action bars
-function ArenaFramesCam_hideMacroText()
+function AFC.hideMacroText()
 	local val
 	if ArenaFramesCamDB.hideMacroText then 
 		val = 0
@@ -451,7 +454,7 @@ function ArenaFramesCam_hideMacroText()
 end
 
 -- hide binding text on action bars
-function ArenaFramesCam_hideBindingText()
+function AFC.hideBindingText()
 	local val
 	if ArenaFramesCamDB.hideBindingText then 
 		val = 0
@@ -467,16 +470,16 @@ function ArenaFramesCam_hideBindingText()
 end
 
 -- handle the water skitter waterwalking mount bind
-function ArenaFramesCam_bindWaterwalkingMount()
+function AFC.bindWaterwalkingMount()
 	if ArenaFramesCamDB.waterwalking then
-		SetOverrideBinding(waterwalkingMountFrame, false, "SHIFT-`", "CLICK waterwalkingMountBtn:LeftButton")
+		SetOverrideBinding(waterwalkingMountFrame, false, "CTRL-`", "CLICK waterwalkingMountBtn:LeftButton")
 	else
 		ClearOverrideBindings(waterwalkingMountFrame)
 	end
 end
 
 --deal with bar art
-function ArenaFramesCam_hideBarArt()
+function AFC.hideBarArt()
 	if ArenaFramesCamDB.hideBarArt then 
 		MainMenuBarArtFrameBackground:Hide()
 		MainMenuBarArtFrame.PageNumber:Hide()
@@ -490,7 +493,7 @@ function ArenaFramesCam_hideBarArt()
 	end
 end
 
-function ArenaFramesCam_hideEndCaps()
+function AFC.hideEndCaps()
 	if ArenaFramesCamDB.hideEndCaps or ArenaFramesCamDB.hideBarArt then
 		MainMenuBarArtFrame.RightEndCap:Hide()
 		MainMenuBarArtFrame.LeftEndCap:Hide()
